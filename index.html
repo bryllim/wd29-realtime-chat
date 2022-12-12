@@ -24,21 +24,17 @@
                         <input type="text" class="form-control" id="nameForm">
                     </div>
                 </div>
-                <div class="container border border-light mt-3 shadow rounded pt-5">
-                    <!-- Guest Area -->
-                    <div id="guest">
+                <div class="container border border-light mt-3 rounded pt-5" style="height:700px; overflow:scroll">
+                    <!-- Chat Area -->
+                    <div id="chatarea">
                     </div>
-                    <!-- User Area -->
-                    <div id="user">
+                </div>
+                <div class="row mt-4 pb-4">
+                    <div class="col-md-10">
+                        <input id="newMessageArea" type="text" class="form-control">
                     </div>
-                    <hr>
-                    <div class="row pb-4">
-                        <div class="col-md-10">
-                            <input id="newMessageArea" type="text" class="form-control">
-                        </div>
-                        <div class="col-md-2">
-                            <button id="newMessageButton" class="btn btn-dark">Send ➡</button>
-                        </div>
+                    <div class="col-md-2">
+                        <button id="newMessageButton" class="btn btn-dark">Send ➡</button>
                     </div>
                 </div>
             </div>
@@ -77,30 +73,37 @@
 
         const sendButton = document.getElementById("newMessageButton");
         const messageForm = document.getElementById("newMessageArea");
-        const userArea = document.getElementById("user");
-        const guestArea = document.getElementById("guest");
+        const chatArea = document.getElementById("chatarea");
         const nameForm = document.getElementById("nameForm");
 
         sendButton.addEventListener("click", sendMessage);
 
         // Send message
         function sendMessage(){
-            const msg = {
-                name: nameForm.value,
-                text: messageForm.value,
-            };
+            if(nameForm.value !== "" && messageForm.value !== ""){
+                let datetime = new Date().toLocaleString();
 
-            push(msgRef, msg);
-            messageForm.value = "";
+                const msg = {
+                    name: nameForm.value,
+                    text: messageForm.value,
+                    timestamp: datetime
+                };
+
+                push(msgRef, msg);
+                messageForm.value = "";
+            }else{
+                alert("Fields must not be empty!")
+            }
         }
 
         
         // Retrive message
         onValue(msgRef, (response) => {
             const data = response.val();
+            chatArea.innerHTML = "";
             for (let index in data){
                 if(data[index].name === nameForm.value){
-                    userArea.innerHTML = 
+                    chatArea.innerHTML += 
                     `<div class="row">
                             <div class="col-md-5"></div>
                             <div class="col-md-7">
@@ -108,10 +111,11 @@
                                 <div class="alert alert-success">
                                     ${data[index].text}
                                 </div>
+                                <p class="text-muted" style="font-size: 75%; margin-top: -13px;">${data[index].timestamp}</small>
                             </div>
                         </div>`;
                 }else{
-                    guestArea.innerHTML =
+                    chatArea.innerHTML +=
                     `
                         <div class="row">
                             <div class="col-md-7">
@@ -119,11 +123,13 @@
                                 <div class="alert alert-secondary">
                                     ${data[index].text}
                                 </div>
+                                <p class="text-muted text-end" style="font-size: 75%; margin-top: -13px;">${data[index].timestamp}</small>
                             </div>
                         </div>
                     `
                 }
             }
+            chatArea.scrollTop = chatArea.scrollHeight;
         });
 
 
